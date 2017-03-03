@@ -13,7 +13,7 @@ This module just contains one script `bin/gitbook-bumper`.
 You can install this script globally using:
 
 ```shell
-npm -i -g gitbook-bumper
+npm install -g gitbook-bumper
 ```
 
 ### Local
@@ -21,7 +21,7 @@ npm -i -g gitbook-bumper
 You can also install it locally to your project:
 
 ```shell
-npm -i --save-dev gitbook-bumper
+npm install --save-dev gitbook-bumper
 ```
 
 It will be accessible from the command line if you added `node_modules` to your path.
