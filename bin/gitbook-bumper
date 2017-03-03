@@ -70,14 +70,26 @@ return Promise()
             }
         });
     }
-}).then(function bump() {
+})
+.then(function checkGitIndexClean() {
+    if (program.commit) {
+        return exec('git diff-index --quiet HEAD --') // Avoid committing unwanted changes
+        .fail(function () {
+            console.error('Your git index is not clean. Aborting');
+            process.exit(1);
+        });
+    }
+})
+.then(function bump() {
     console.log('Writing version ' + newVersion + ' to package.json...');
     bumpPkg(packagePath, package, newVersion);
-}).then(function commit() {
+})
+.then(function commit() {
     if (program.commit) {
         return commitTag(packagePath, program, newVersion);
     }
-}).then(function push() {
+})
+.then(function push() {
     if (program.push) {
         console.log('Pushing commits...');
         return exec('git push')
@@ -86,7 +98,8 @@ return Promise()
             return exec('git push --tags')
         });
     }
-}).then(function () {
+})
+.then(function () {
     console.log('Done.');
 });
 
@@ -105,7 +118,10 @@ function bumpPkg(packagePath, package, version) {
 }
 
 function commitTag(packagePath, program, version) {
-    return exec('git add ' + packagePath)
+    return Promise()
+    .then(function () {
+        return exec('git add ' + packagePath)
+    })
     .then(function () {
         var ciMsg = '"Bump version to ' + version + ' :rocket:"';
         console.log('Committing ' + ciMsg + '...');
