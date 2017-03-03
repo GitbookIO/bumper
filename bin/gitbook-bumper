@@ -71,6 +71,7 @@ return Promise()
         });
     }
 }).then(function bump() {
+    console.log('Writing version ' + newVersion + ' to package.json...');
     bumpPkg(packagePath, package, newVersion);
 }).then(function commit() {
     if (program.commit) {
@@ -78,13 +79,16 @@ return Promise()
     }
 }).then(function push() {
     if (program.push) {
+        console.log('Pushing commits...');
         return exec('git push')
         .then(function () {
-            return exec('git push --tags');
+            console.log('Pushing tags...');
+            return exec('git push --tags')
         });
     }
+}).then(function () {
+    console.log('Done.');
 });
-
 
 
 /**
@@ -103,9 +107,12 @@ function bumpPkg(packagePath, package, version) {
 function commitTag(packagePath, program, version) {
     return exec('git add ' + packagePath)
     .then(function () {
-        return exec('git commit -m "Bump version to ' + version + ' :rocket:"');
+        var ciMsg = '"Bump version to ' + version + ' :rocket:"';
+        console.log('Committing ' + ciMsg + '...');
+        return exec('git commit -m ' + ciMsg);
     })
     .then(function () {
+        console.log('Tagging...');
         return exec('git tag ' + version);
     });
 }
