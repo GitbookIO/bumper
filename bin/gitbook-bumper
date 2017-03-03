@@ -2,9 +2,11 @@
 
 var fs = require('fs');
 var path = require('path');
+var Promise = require('q');
 var semver = require('semver');
 var program = require('commander');
 var inquirer = require('inquirer');
+var exec = require('child-process-promise').exec;
 
 var INDENTATION = 2;
 
@@ -16,6 +18,12 @@ program
     .version(require('../package').version)
     .option('-d, --dir <path>',
             'directory of the Node module (default \'./\')')
+    .option('-f, --force',
+            'do not ask for confirmation')
+    .option('-c, --commit',
+            'make a commit and tag with version')
+    .option('-p, --push',
+            'push commit and tag to remote')
     .parse(process.argv);
 
 
@@ -49,26 +57,35 @@ var newVersion = semver.inc(package.version, level, preid)
 
 
 /* Ask confirmation */
-var prompts = []
-if (!program.force) {
-    prompts.push({
-        name: 'confirm',
-        type: 'confirm',
-        message: 'Bump from ' + package.version + ' to ' + newVersion + ' ?'
-    });
-}
-
-inquirer.prompt(prompts).then(function (answers) {
-    if (!answers.confirm) {
-        process.exit(1);
+return Promise()
+.then(function confirm() {
+    if (!program.force) {
+        return inquirer.prompt({
+            name: 'confirm',
+            type: 'confirm',
+            message: 'Bump from ' + package.version + ' to ' + newVersion + ' ?'
+        }).then(function (answers) {
+            if (!answers.confirm) {
+                process.exit(1);
+            }
+        });
     }
-    console.log(newVersion)
-})
+}).then(function bump() {
+    // bumpPkg(packagePath, package, newVersion);
+}).then(function commit() {
+    if (program.commit) {
+        return commitTag(packagePath, program, newVersion);
+    }
+}).then(function push() {
+    if (program.push) {
+        return exec('git push')
+        .then(function () {
+            return exec('git push --tags');
+        });
+    }
+});
 
 
-/* Write it back */
-package.version = newVersion;
-fs.writeFileSync(packagePath, JSON.stringify(package, null, INDENTATION) + '\n');
 
 /**
  * Test validity of a version level
@@ -78,3 +95,17 @@ function validLevel(level) {
     return re.test(level);
 }
 
+function bumpPkg(packagePath, package, version) {
+    package.version = version;
+    fs.writeFileSync(packagePath, JSON.stringify(package, null, INDENTATION) + '\n');
+}
+
+function commitTag(packagePath, program, version) {
+    return exec('git add ' + packagePath)
+    .then(function () {
+        return exec('git commit -m "Bump version to ' + version + ' :rocket:');
+    })
+    .then(function () {
+        return exec('git tag ' + version);
+    });
+}
