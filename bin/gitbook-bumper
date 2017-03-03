@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+var path = require('path');
+var semver = require('semver');
+var program = require('commander');
+
+var INDENTATION = 2;
+
+var LEVELS = ['major','minor','patch','premajor','preminor','prepatch','prerelease'];
+
+/* Parse command line args */
+program
+    .usage('[options] <major|minor|patch>')
+    .version(require('../package').version)
+    .option('-d, --dir <path>',
+            'directory of the Node module (default \'./\')')
+    .parse(process.argv);
+
+
+/* Process args */
+var projectPath = path.join(process.cwd(), program.dir || '.')
+var packagePath = path.join(projectPath, './package.json');
+// Version increment level
+var level = (program.args[0] || 'patch').toLowerCase();
+if (!validLevel(level)) {
+    console.error('Invalid version level identifier "' + level + '" must be one of ' + LEVELS.join(', '));
+    process.exit(1);
+}
+// Prerelease name, such as 'alpha', 'beta'
+var prename = (program.args[1] || '').toLowerCase();
+
+
+/* Load package.json */
+var package;
+try {
+    package = require(packagePath);
+} catch (e) {
+    console.error('Could not load package.json at', projectPath);
+    process.exit(1);
+}
+
+
+/* Bump the version */
+var newVersion = semver.inc(package.version, level, prename)
+console.log(newVersion)
+
+
+/* Write it back */
+package.version = newVersion;
+fs.writeFileSync(packagePath, JSON.stringify(package, null, INDENTATION));
+
+// Test validity of a version level
+function validLevel(level) {
+    var re = new RegExp('^(' + LEVELS.join('|') + ')$');
+    return re.test(level);
+}
+
