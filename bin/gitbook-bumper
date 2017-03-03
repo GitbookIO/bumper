@@ -71,7 +71,7 @@ return Promise()
         });
     }
 }).then(function bump() {
-    // bumpPkg(packagePath, package, newVersion);
+    bumpPkg(packagePath, package, newVersion);
 }).then(function commit() {
     if (program.commit) {
         return commitTag(packagePath, program, newVersion);
@@ -103,7 +103,7 @@ function bumpPkg(packagePath, package, version) {
 function commitTag(packagePath, program, version) {
     return exec('git add ' + packagePath)
     .then(function () {
-        return exec('git commit -m "Bump version to ' + version + ' :rocket:');
+        return exec('git commit -m "Bump version to ' + version + ' :rocket:"');
     })
     .then(function () {
         return exec('git tag ' + version);
