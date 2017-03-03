@@ -48,7 +48,7 @@ console.log(newVersion)
 
 /* Write it back */
 package.version = newVersion;
-fs.writeFileSync(packagePath, JSON.stringify(package, null, INDENTATION));
+fs.writeFileSync(packagePath, JSON.stringify(package, null, INDENTATION) + '\n');
 
 /**
  * Test validity of a version level
