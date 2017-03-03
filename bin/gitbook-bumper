@@ -11,7 +11,7 @@ var LEVELS = ['major','minor','patch','premajor','preminor','prepatch','prerelea
 
 /* Parse command line args */
 program
-    .usage('[options] <major|minor|patch>')
+    .usage('[options] <level> [prerelease-id]\n\n\t Where level is one of ' + LEVELS.join(', '))
     .version(require('../package').version)
     .option('-d, --dir <path>',
             'directory of the Node module (default \'./\')')
@@ -28,7 +28,7 @@ if (!validLevel(level)) {
     process.exit(1);
 }
 // Prerelease name, such as 'alpha', 'beta'
-var prename = (program.args[1] || '').toLowerCase();
+var prename = (program.args[1] || 'alpha').toLowerCase();
 
 
 /* Load package.json */
@@ -50,7 +50,9 @@ console.log(newVersion)
 package.version = newVersion;
 fs.writeFileSync(packagePath, JSON.stringify(package, null, INDENTATION));
 
-// Test validity of a version level
+/**
+ * Test validity of a version level
+ */
 function validLevel(level) {
     var re = new RegExp('^(' + LEVELS.join('|') + ')$');
     return re.test(level);
