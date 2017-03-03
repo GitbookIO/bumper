@@ -4,6 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var semver = require('semver');
 var program = require('commander');
+var inquirer = require('inquirer');
 
 var INDENTATION = 2;
 
@@ -21,14 +22,16 @@ program
 /* Process args */
 var projectPath = path.join(process.cwd(), program.dir || '.')
 var packagePath = path.join(projectPath, './package.json');
+
 // Version increment level
 var level = (program.args[0] || 'patch').toLowerCase();
 if (!validLevel(level)) {
     console.error('Invalid version level identifier "' + level + '" must be one of ' + LEVELS.join(', '));
     process.exit(1);
 }
-// Prerelease name, such as 'alpha', 'beta'
-var prename = (program.args[1] || 'alpha').toLowerCase();
+
+// Prerelease identifier, such as 'alpha', 'beta'
+var preid = (program.args[1] || 'alpha').toLowerCase();
 
 
 /* Load package.json */
@@ -42,8 +45,25 @@ try {
 
 
 /* Bump the version */
-var newVersion = semver.inc(package.version, level, prename)
-console.log(newVersion)
+var newVersion = semver.inc(package.version, level, preid)
+
+
+/* Ask confirmation */
+var prompts = []
+if (!program.force) {
+    prompts.push({
+        name: 'confirm',
+        type: 'confirm',
+        message: 'Bump from ' + package.version + ' to ' + newVersion + ' ?'
+    });
+}
+
+inquirer.prompt(prompts).then(function (answers) {
+    if (!answers.confirm) {
+        process.exit(1);
+    }
+    console.log(newVersion)
+})
 
 
 /* Write it back */
