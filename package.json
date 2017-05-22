@@ -1,6 +1,6 @@
 {
   "name": "gitbook-bumper",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Easily bump your node module, following GitBook's convention for SemVer",
   "main": "",
   "bin": {
