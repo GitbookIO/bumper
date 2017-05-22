@@ -29,7 +29,10 @@ program
 
 /* Process args */
 var projectPath = path.join(process.cwd(), program.dir || '.')
-var packagePath = path.join(projectPath, './package.json');
+var lernaPath = path.join(projectPath, './lerna.json')
+var packagePath = fs.existsSync(lernaPath)
+                ? lernaPath
+                : path.join(projectPath, './package.json');
 
 // Version increment level
 var level = (program.args[0] || 'patch').toLowerCase();
