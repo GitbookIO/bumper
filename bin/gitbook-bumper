@@ -18,7 +18,7 @@ program
     .version(require('../package').version)
     .option('-d, --dir <path>',
             'directory of the Node module (default \'./\')')
-    .option('--confirm',
+    .option('--no-confirm',
             'do not ask for confirmation')
     .option('-c, --commit',
             'make a commit and tag with version')

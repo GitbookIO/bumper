@@ -78,7 +78,7 @@ Done.
     -h, --help        output usage information
     -V, --version     output the version number
     -d, --dir <path>  directory of the Node module (default './')
-    -confirm          do not ask for confirmation
+    --no-confirm      do not ask for confirmation
     -c, --commit      make a commit and tag with version
     -p, --push        push commit and tag to remote
 
